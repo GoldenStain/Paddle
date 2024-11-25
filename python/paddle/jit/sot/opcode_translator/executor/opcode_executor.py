@@ -49,7 +49,12 @@ from ..instruction_utils import (
     calc_stack_effect,
     get_instructions,
 )
-from ..instruction_utils.opcode_info import RETURN, JumpDirection, PopJumpCond
+from ..instruction_utils.opcode_info import (
+    RETURN,
+    SUFFIX_TO_BOOL,
+    JumpDirection,
+    PopJumpCond,
+)
 from .dispatch_functions import (
     operator_BAD,
     operator_exception_match,
@@ -1344,11 +1349,9 @@ class OpcodeExecutorBase:
     def TO_BOOL(self, instr: Instruction):
         # we don't do anything in TO_BOOL, we simply check if the bytecode is legal
         next_instr = self._instructions[self._lasti]
-        assert next_instr.opname in [
-            'POP_JUMP_IF_TRUE',
-            'POP_JUMP_IF_FALSE',
-            'UNARY_NOT',
-        ], f"The bytecode is illegal! The opcode following TO_BOOL must be in ['POP_JUMP_IF_TRUE', 'POP_JUMP_IF_FALSE', 'UNARY_NOT'], the next instuction now is {next_instr.opname}"
+        assert (
+            next_instr.opname in SUFFIX_TO_BOOL
+        ), f"The bytecode is illegal! The opcode following TO_BOOL must be in ['POP_JUMP_IF_TRUE', 'POP_JUMP_IF_FALSE', 'UNARY_NOT'], the next instuction now is {next_instr.opname}"
 
     @call_break_graph_decorator(push_n=1)
     def IS_OP(self, instr: Instruction):
@@ -2112,6 +2115,7 @@ class OpcodeExecutor(OpcodeExecutorBase):
 
         # 5. create if sturcture and call true_fn and false_fn
         var_loader.load(result)
+        self._graph.pycode_gen.add_instr('TO_BOOL')
         if_code = self._graph.pycode_gen.add_instr(instr.opname)
 
         assert true_fn is not None
