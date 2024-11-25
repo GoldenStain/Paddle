@@ -449,5 +449,7 @@ std::tuple<std::vector<int64_t>,
            paddle::flat_hash_map<int64_t, phi::ReduceType>>
 CvtPlacements(phi::distributed::Placements placements, int ndim);
 
+void EagerSetDeviceId();
+
 }  // namespace pybind
 }  // namespace paddle

@@ -944,7 +944,7 @@ struct WrapKeyEqual : public T {
 //   or a DataNode with a pointer to std::pair<key,val>. Which DataNode
 //   representation to use
 //   depends on how fast the swap() operation is. Heuristically, this is
-//   automatically choosen
+//   automatically chosen
 //   based on sizeof(). there are always 2^n Nodes.
 //
 // * info: Each Node in the map has a corresponding info byte, so there are 2^n

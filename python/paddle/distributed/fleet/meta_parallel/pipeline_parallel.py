@@ -878,7 +878,8 @@ class PipelineParallel(MetaParallelBase):
 
         for step_id in range(startup_steps):
             input_tensor = self._p2p_helper.recv_forward(
-                self.is_pipeline_first_stage()
+                self.is_pipeline_first_stage(),
+                batch_p2p_comm=self._use_batch_p2p_comm,
             )
 
             output_tensor = self._forward_step(
@@ -888,6 +889,7 @@ class PipelineParallel(MetaParallelBase):
                 output_tensor,
                 self.is_pipeline_last_stage(),
                 skip_check_meta=True,
+                batch_p2p_comm=self._use_batch_p2p_comm,
             )
 
             input_buffers.append(input_tensor)
@@ -895,7 +897,8 @@ class PipelineParallel(MetaParallelBase):
 
         if steady_steps > 0:
             input_tensor = self._p2p_helper.recv_forward(
-                self.is_pipeline_first_stage()
+                self.is_pipeline_first_stage(),
+                batch_p2p_comm=self._use_batch_p2p_comm,
             )
 
         for i in range(steady_steps):
@@ -908,6 +911,7 @@ class PipelineParallel(MetaParallelBase):
                 output_tensor,
                 self.is_pipeline_last_stage(),
                 skip_check_meta=True,
+                batch_p2p_comm=self._use_batch_p2p_comm,
             )
 
             input_buffers.append(input_tensor)
@@ -915,7 +919,8 @@ class PipelineParallel(MetaParallelBase):
 
             if not last_iter:
                 input_tensor = self._p2p_helper.recv_forward(
-                    self.is_pipeline_first_stage()
+                    self.is_pipeline_first_stage(),
+                    batch_p2p_comm=self._use_batch_p2p_comm,
                 )
 
         if self._compute_loss:

@@ -56,7 +56,7 @@ TEST(bfloat16, convert_bfloat16_to_float32_on_gpu) {
   EXPECT_EQ(static_cast<bool>(bfloat16(true)), true);
 }
 
-TEST(bfloat16, lod_tensor_on_gpu) {
+TEST(bfloat16, dense_tensor_on_gpu) {
   phi::DenseTensor src_tensor;
   phi::DenseTensor gpu_tensor;
   phi::DenseTensor dst_tensor;

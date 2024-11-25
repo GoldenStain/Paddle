@@ -102,6 +102,16 @@ std::tuple<pir::Value, pir::Value> fused_gemm_epilogue(pir::Value x,
                                                        bool trans_x,
                                                        bool trans_y,
                                                        std::string activation);
+
+std::tuple<pir::Value, pir::Value, pir::Value> fused_gemm_epilogue_grad(
+    pir::Value x,
+    pir::Value y,
+    paddle::optional<pir::Value> reserve_space,
+    pir::Value out_grad,
+    bool trans_x,
+    bool trans_y,
+    std::string activation_grad);
+
 pir::Value array_pop(pir::Value input, int index);
 
 std::vector<pir::Value> tensorrt_engine(

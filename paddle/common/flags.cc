@@ -1588,6 +1588,11 @@ PHI_DEFINE_EXPORTED_bool(logging_pir_py_code_dump_symbolic_dims,
                          false,
                          "whether dump symbolic dims into pir py code.");
 
+PHI_DEFINE_EXPORTED_bool(
+    pir_interpreter_record_stream_for_gc_cache,
+    false,
+    "whether PirInterpreter::RecordStreamForGC use cache strategy.");
+
 /**
  * Using PIR API in Python
  * Name: enable_pir_api
@@ -1686,7 +1691,7 @@ PHI_DEFINE_EXPORTED_string(
     "It controls the forward blacklist ops not to be decomposed.");
 
 #if defined(PADDLE_WITH_NCCL) || defined(PADDLE_WITH_RCCL) || \
-    defined(PADDLE_WITH_XPU_BKCL)
+    defined(PADDLE_WITH_XPU_BKCL) || defined(PADDLE_WITH_CUSTOM_DEVICE)
 /**
  * Communication library related FLAG
  * Name: FLAGS_dynamic_static_unified_comm

@@ -185,7 +185,7 @@
   kernel :
     func : fc_xpu
     data_type : x
-  optional : bias, x_max, scale_max, out_max_in
+  optional : bias, x_max, w_max, scale_max, out_max_in
 
 - op : fp8_fp8_half_gemm_fused
   args : (Tensor x, Tensor y, Tensor bias, bool transpose_x = false, bool transpose_y = false, float scale = 1.0f, str output_dtype = "float16", str activation_type = "identity")

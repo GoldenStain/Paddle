@@ -49,7 +49,11 @@ __all__ = []
 def _varbase_help(param):
     state = copy.deepcopy(param.__dict__)
     new_param = EagerParamBase(
-        shape=param.shape, dtype=param.dtype, name=param.name, **state
+        shape=param.shape,
+        dtype=param.dtype,
+        trainable=param.trainable,
+        name=param.name,
+        **state,
     )
     param._share_buffer_to(new_param)
     return new_param

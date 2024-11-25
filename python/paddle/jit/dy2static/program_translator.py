@@ -132,23 +132,33 @@ def check_view_api_used_by_inplace(program: paddle.pir.Program) -> None:
         a = transpose(b)
         b.add_(c)
     """
+    # TODO(ooooo): Deal with these inplace ops
+    skipped_inplace_ops = [
+        "pd_op.set_value_",
+        "pd_op.set_value_with_tensor_",
+        # It willn't change tensor imdeiately,but it's ouput is dangerous.
+        "pd_op.share_data_",
+    ]
+
+    def val_is_used_by_stride_op(op, val):
+        return op.name() in framework.stride_ops and op.operand_source(
+            0
+        ).is_same(val)
+
+    def is_used_by_inplace_op(op, val, info):
+        return op.name().endswith("_") and any(
+            op.operand_source(index).is_same(val) for index in info.values()
+        )
+
     all_vars_list = program.list_vars()
     for value in all_vars_list:
         uesd_by_stride_ops = []
-        for op in value.all_used_ops()[::-1]:
+        for op in reversed(value.all_used_ops()):
             inplace_info = paddle.core.pir.get_op_inplace_info(op)
-            if op.name() in framework.stride_ops and op.operand_source(
-                0
-            ).is_same(value):
+            if val_is_used_by_stride_op(op, value):
                 uesd_by_stride_ops.append(op)
-            if op.name().endswith("_") and any(
-                op.operand_source(index).is_same(value)
-                for index in inplace_info.keys()
-            ):
-                if (
-                    op.name() == "pd_op.set_value_"
-                    or op.name() == "pd_op.set_value_with_tensor_"
-                ):
+            if is_used_by_inplace_op(op, value, inplace_info):
+                if op.name() in skipped_inplace_ops:
                     continue
                 if value.get_defining_op().name() in framework.stride_ops:
                     show_op_callstack(op)

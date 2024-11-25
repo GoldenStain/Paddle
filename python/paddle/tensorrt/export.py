@@ -160,10 +160,9 @@ class TensorRTConfig:
             min_subgraph_size (int, optional):
                 The minimum number of operations in a subgraph for TensorRT to optimize (default is 3).
             save_model_dir (str, optional):
-                The directory where the optimized model will be saved (default is None).
+                 The directory where the optimized model will be saved (default is None).
             disable_ops : (str|list, optional):
                 A string representing the names of operations that should not be entering by TensorRT (default is None).
-
         Returns:
             None
 

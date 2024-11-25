@@ -49,6 +49,30 @@ struct UnsignedPowFunctor {
   float porder;
 };
 
+template <typename T>
+struct FabsFunctor {
+  HOSTDEVICE explicit inline FabsFunctor() = default;
+  HOSTDEVICE inline T operator()(const T x) const {
+    return static_cast<T>(inline_fabs(x));
+  }
+};
+
+template <typename T>
+struct SquareFunctor {
+  HOSTDEVICE explicit inline SquareFunctor() = default;
+  HOSTDEVICE inline T operator()(const T x) const {
+    return static_cast<T>(inline_square(x));
+  }
+};
+
+template <typename T>
+struct FabsCubicFunctor {
+  HOSTDEVICE explicit inline FabsCubicFunctor() = default;
+  HOSTDEVICE inline T operator()(const T x) const {
+    return static_cast<T>(inline_fabs_cubic(x));
+  }
+};
+
 template <typename T, typename Context>
 void PNormKernel(const Context& dev_ctx,
                  const DenseTensor& x,
@@ -84,14 +108,32 @@ void PNormKernel(const Context& dev_ctx,
     phi::funcs::ReduceKernel<T, T, kps::MinFunctor, AbsFunctor<T>>(
         dev_ctx, *in_x, out_norm, AbsFunctor<T>(), reduce_axis);
   } else {
-    phi::funcs::ReduceKernel<T, T, kps::AddFunctor, UnsignedPowFunctor<T>>(
-        dev_ctx, *in_x, out_norm, UnsignedPowFunctor<T>(porder), reduce_axis);
+    if (porder == 1.0) {
+      // fast 1-norm
+      phi::funcs::ReduceKernel<T, T, kps::AddFunctor, FabsFunctor<T>>(
+          dev_ctx, *in_x, out_norm, FabsFunctor<T>(), reduce_axis);
+    } else if (porder == 2.0) {
+      // fast 2-norm
+      phi::funcs::ReduceKernel<T, T, kps::AddFunctor, SquareFunctor<T>>(
+          dev_ctx, *in_x, out_norm, SquareFunctor<T>(), reduce_axis);
+    } else if (porder == 3.0) {
+      // fast 3-norm
+      phi::funcs::ReduceKernel<T, T, kps::AddFunctor, FabsCubicFunctor<T>>(
+          dev_ctx, *in_x, out_norm, FabsCubicFunctor<T>(), reduce_axis);
+    } else {
+      // vanilla norm
+      phi::funcs::ReduceKernel<T, T, kps::AddFunctor, UnsignedPowFunctor<T>>(
+          dev_ctx, *in_x, out_norm, UnsignedPowFunctor<T>(porder), reduce_axis);
+    }
 
-    const DenseTensor* tmp_norm = out_norm;
-    std::vector<const DenseTensor*> ins = {tmp_norm};
-    std::vector<DenseTensor*> outs = {out_norm};
-    phi::funcs::ElementwiseKernel<T>(
-        dev_ctx, ins, &outs, UnsignedPowFunctor<T>(1. / porder));
+    if (porder != 1.0) {
+      // save computation when porder is 1.0
+      const DenseTensor* tmp_norm = out_norm;
+      std::vector<const DenseTensor*> ins = {tmp_norm};
+      std::vector<DenseTensor*> outs = {out_norm};
+      phi::funcs::ElementwiseKernel<T>(
+          dev_ctx, ins, &outs, UnsignedPowFunctor<T>(1. / porder));
+    }
   }
 }
 }  // namespace phi

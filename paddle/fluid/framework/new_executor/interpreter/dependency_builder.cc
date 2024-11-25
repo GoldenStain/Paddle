@@ -783,10 +783,10 @@ void DependencyBuilderSimplify::GetAllbehind() {
     }
   };
   for (size_t i = start_index_; i < op_num_; i++) {
-    auto& behinds = ops_behind_[i];
-    auto& befores = ops_before_[i];
-    for (auto before_op : befores) {
-      for (auto behind_op : behinds) {
+    auto& behind_ops = ops_behind_[i];
+    auto& before_ops = ops_before_[i];
+    for (auto before_op : before_ops) {
+      for (auto behind_op : behind_ops) {
         update_op_happen_before(before_op, behind_op);
       }
     }

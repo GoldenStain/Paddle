@@ -193,4 +193,20 @@ OpTy Builder::Build(Args &&...args) {
   return OpTy(op);
 }
 
+class BuilderAttrGuard {
+ public:
+  BuilderAttrGuard(std::shared_ptr<Builder> builder, int op_role, int chunk_id);
+
+  ~BuilderAttrGuard();
+
+  // forbid copy and operator=
+  BuilderAttrGuard(const BuilderAttrGuard &guard) = delete;
+  BuilderAttrGuard &operator=(const BuilderAttrGuard &guard) = delete;
+
+ private:
+  std::shared_ptr<Builder> builder_;
+  int pre_op_role_ = -1;
+  int pre_chunk_id_ = -1;
+};
+
 }  // namespace pir

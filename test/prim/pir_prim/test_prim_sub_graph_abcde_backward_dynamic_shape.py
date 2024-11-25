@@ -69,6 +69,10 @@ def batch_norm_net4(x, y, z):
     )
 
 
+def ceil_net(x):
+    return paddle.ceil(x)
+
+
 def concat_net1(x):
     y = x + 1
     return paddle.concat([x, y], axis=-1)
@@ -518,6 +522,19 @@ class TestPrimBatchNormWithGrad11(TestPrimThreeWithGrad):
         self.net = batch_norm_net4
         self.enable_cinn = False
         self.tol = 1e-5
+
+
+class TestPrimCeilWithGrad(TestPrimBaseWithGrad):
+    def setUp(self):
+        np.random.seed(2024)
+        self.op_name = "pd_op.ceil_grad"
+        self.dtype = "float32"
+        self.x_shape = [30, 200, 40]
+        self.init_x_shape = [None, None, None]
+        self.x = np.random.random(self.x_shape).astype(self.dtype)
+        self.net = ceil_net
+        self.enable_cinn = False
+        self.tol = 1e-6
 
 
 class TestPrimConcatWithGrad1(TestPrimBaseWithGrad):

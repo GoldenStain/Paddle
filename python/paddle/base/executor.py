@@ -1152,6 +1152,21 @@ class _ExecutorCache:
         place = cached_data.place
         scope = cached_data.scope
 
+        def cinn_process(program):
+            from paddle.decomposition import decomp
+
+            if core._enable_dist_prim_all():
+                logging.info("apply decompose in executor")
+                with decomp.prim_guard():
+                    decomp.decompose_dist_program(program)
+
+            if core._enable_auto_recompute():
+                logging.info("apply auto_recompute in executor")
+                program = decomp.auto_recompute_pir_program(program, None)
+
+            apply_cinn_pass(program)
+            return program
+
         if cached_data.plan is None:
             value_map = pir.IrMapping()
             _, is_startup_program = has_fetch_operations_and_is_startup_program(
@@ -1174,6 +1189,10 @@ class _ExecutorCache:
                 fetch_var_name=fetch_var_name,
             )
             default_job = core.Job("default")
+
+            if not is_startup_program and in_cinn_mode():
+                cinn_process(program)
+
             type_to_program = {"default": program}
             plan = core.Plan([default_job], type_to_program)
         else:
@@ -1200,6 +1219,11 @@ class _ExecutorCache:
                     value.block.program, value, fetch_var_name + str(i), i
                 )
 
+            if in_cinn_mode():
+                for job_type in plan.job_types():
+                    ir_program = plan.ir_program(job_type)
+                    cinn_process(ir_program)
+
         new_exe = _StandaloneExecutor(place, plan, scope)
 
         data_op_infos = []
@@ -1216,18 +1240,7 @@ class _ExecutorCache:
                     op.result(0).persistable,
                 )
                 data_op_infos.append(tup)
-        from paddle.decomposition import decomp
 
-        if core._enable_dist_prim_all():
-            with decomp.prim_guard():
-                decomp.decompose_dist_program(program)
-
-        if core._enable_auto_recompute():
-            logging.info("apply auto_recompute in executor")
-            program = decomp.auto_recompute_pir_program(program, None)
-
-        if in_cinn_mode():
-            apply_cinn_pass(program)
         return program, new_exe, data_op_infos
 
 
@@ -2997,7 +3010,7 @@ class Executor:
                             tensor = as_numpy(tensor)
                     except:
                         var = scope.find_var(varname)
-                        tensor = var.get_lod_tensor_array()
+                        tensor = var.get_dense_tensor_array()
                         if return_numpy:
                             tensor = as_numpy(tensor)
                         else:

@@ -225,7 +225,7 @@ bool DistModel::PreparePlace() {
     place_ = phi::CustomPlace(config_.device_type, config_.device_id);
   } else {
     PADDLE_THROW(common::errors::InvalidArgument(
-        "Place must be choosen from GPU or CPU or XPU, but got %s.",
+        "Place must be chosen from GPU or CPU or XPU, but got %s.",
         config_.place));
   }
   return true;

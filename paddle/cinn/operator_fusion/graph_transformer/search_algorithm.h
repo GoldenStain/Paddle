@@ -140,8 +140,8 @@ struct SearchAlgorithm<ReverseTopoNodePairPattern,
 template <typename Kind, typename GraphMatcher, typename GraphOperation>
 void GraphTransformer(PatternGraph* graph) {
   VLOG(4) << "Start GraphTransformer...";
-  auto alog = SearchAlgorithm<Kind, GraphMatcher, GraphOperation>(graph);
-  alog();
+  auto algo = SearchAlgorithm<Kind, GraphMatcher, GraphOperation>(graph);
+  algo();
 }
 
 }  // namespace cinn::fusion

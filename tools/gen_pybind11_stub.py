@@ -185,7 +185,7 @@ def _patch_pybind11_invalid_name():
 
 
 def _patch_pybind11_invalid_annotation():
-    # patch invalid annotaion as `Value`, e.g. 'capsule' to 'typing_extensions.CapsuleType'
+    # patch invalid annotation as `Value`, e.g. 'capsule' to 'typing_extensions.CapsuleType'
     def wrap_name(func):
         @functools.wraps(func)
         def wrapper(self, arg: Annotation):

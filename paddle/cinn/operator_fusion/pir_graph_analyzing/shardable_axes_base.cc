@@ -192,13 +192,17 @@ ShardableAxesSignature CreateSignatureForTranspose(pir::Operation* op) {
 
   std::vector<int32_t> perm =
       GetInt32ArrayAttributeData(op->attributes().at("perm"));
-  PADDLE_ENFORCE_EQ(perm.size(),
-                    input_axes.size(),
-                    ::common::errors::PreconditionNotMet(
-                        "The size of perm shoud be equal input rank."));
-  std::vector<std::string> output_axes;
+  PADDLE_ENFORCE_LE(
+      perm.size(),
+      input_axes.size(),
+      ::common::errors::PreconditionNotMet(
+          "The size of perm shoud be equal to or less than the input rank. But "
+          "received perm size is %d, input rank is %d",
+          perm.size(),
+          input_axes.size()));
+  std::vector<std::string> output_axes = input_axes;
   for (size_t i = 0; i < perm.size(); ++i) {
-    output_axes.emplace_back(input_axes[perm[i]]);
+    output_axes[i] = input_axes[perm[i]];
   }
 
   ShardableAxesSignature result = ShardableAxesSignature();

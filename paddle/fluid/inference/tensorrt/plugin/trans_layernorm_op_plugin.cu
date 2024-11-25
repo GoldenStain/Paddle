@@ -35,7 +35,7 @@ inline int getSMVersion() {
   return prop.major * 10 + prop.minor;
 }
 
-#ifdef TRT_PLUGIN_FP16_AVALIABLE
+#ifdef TRT_PLUGIN_FP16_AVAILABLE
 #define FINAL_MASK 0xffffffff
 
 template <int UNROLL_FACTOR>

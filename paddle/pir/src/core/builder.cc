@@ -106,4 +106,23 @@ TensorNameAttribute Builder::tensor_name_attr(const std::string &value) {
   return TensorNameAttribute::get(context_, value);
 }
 
+BuilderAttrGuard::BuilderAttrGuard(std::shared_ptr<Builder> builder,
+                                   int op_role,
+                                   int chunk_id)
+    : builder_(builder),
+      pre_op_role_(builder_->op_role()),
+      pre_chunk_id_(builder_->chunk_id()) {
+  if (pre_op_role_ != op_role) {
+    builder_->set_op_role(op_role);
+  }
+  if (pre_chunk_id_ != chunk_id) {
+    builder_->set_chunk_id(chunk_id);
+  }
+}
+
+BuilderAttrGuard::~BuilderAttrGuard() {  // NOLINT
+  builder_->set_op_role(pre_op_role_);
+  builder_->set_chunk_id(pre_chunk_id_);
+}
+
 }  // namespace pir

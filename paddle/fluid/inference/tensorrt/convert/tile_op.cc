@@ -78,7 +78,7 @@ class TileOpConverter : public OpConverter {
       itensors.push_back(input_shape_tensor);
       input_shape_tensor = Concat(itensors);
       // need reshape input to more dims.
-      input = Reshape(input, input_shape_tensor, "reshape_input_befor_slice");
+      input = Reshape(input, input_shape_tensor, "reshape_input_before_slice");
       repeat_expand_tensor = repeat_tensor;
     } else {
       repeat_expand_tensor = repeat_tensor;

@@ -41,7 +41,7 @@ inline int getSMVersion() {
   return prop.major * 10 + prop.minor;
 }
 
-#ifdef TRT_PLUGIN_FP16_AVALIABLE
+#ifdef TRT_PLUGIN_FP16_AVAILABLE
 #define FINAL_MASK 0xffffffff
 
 template <int UNROLL_FACTOR>
@@ -304,7 +304,7 @@ bool PrelnResidualBiasPluginDynamic::supportsFormatCombination(
   const nvinfer1::PluginTensorDesc &in = in_out[pos];
   if (pos == 0) {
     if (with_fp16_) {
-#ifdef TRT_PLUGIN_FP16_AVALIABLE
+#ifdef TRT_PLUGIN_FP16_AVAILABLE
       return (in.type == nvinfer1::DataType::kHALF) &&
              (in.format == nvinfer1::TensorFormat::kLINEAR);
 #else
@@ -427,7 +427,7 @@ int PrelnResidualBiasPluginDynamic::enqueue(
         stream);
 
   } else if (input_type == nvinfer1::DataType::kHALF) {
-#ifdef TRT_PLUGIN_FP16_AVALIABLE
+#ifdef TRT_PLUGIN_FP16_AVAILABLE
     VLOG(1) << "TRT Plugin DataType selected. PrelnResidualBias-->fp16";
     const half *input1 = static_cast<const half *>(inputs[0]);
     const half *input2 = static_cast<const half *>(inputs[1]);

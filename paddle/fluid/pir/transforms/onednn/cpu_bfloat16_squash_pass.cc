@@ -396,20 +396,20 @@ class CPUBf16QuantizeSquashPass : public pir::PatternRewritePass {
 
   pir::RewritePatternSet InitializePatterns(pir::IrContext *context) override {
     pir::RewritePatternSet ps(context);
-    uint32_t benfit = 100;
+    uint32_t benefit = 100;
 
     auto q_dq_onednn_pattern = std::make_unique<DequantQuantBf16SquashPattern>(
-        context, benfit--, std::vector<std::string>{});
+        context, benefit--, std::vector<std::string>{});
     ps.Add(std::move(q_dq_onednn_pattern));
 
     auto q_dq_multi_onednn_pattern =
         std::make_unique<DequantQuantBf16MultiUserPattern>(
-            context, benfit--, std::vector<std::string>{});
+            context, benefit--, std::vector<std::string>{});
     ps.Add(std::move(q_dq_multi_onednn_pattern));
 
     auto q_conv_onednn_pattern = std::make_unique<QuantConvBf16SquashPattern>(
         context,
-        benfit--,
+        benefit--,
         std::vector<std::string>{
             paddle::onednn::dialect::FusedConv2dOp::name(),
         });
@@ -418,14 +418,14 @@ class CPUBf16QuantizeSquashPass : public pir::PatternRewritePass {
     auto q_fusedconv_onednn_pattern =
         std::make_unique<QuantFusedConvBf16SquashPattern>(
             context,
-            benfit--,
+            benefit--,
             std::vector<std::string>{
                 paddle::onednn::dialect::FusedConv2dOp::name(),
             });
     ps.Add(std::move(q_fusedconv_onednn_pattern));
 
     auto op_dq_onednn_pattern = std::make_unique<OpDequantBf16SquashPattern>(
-        context, benfit--, std::vector<std::string>{});
+        context, benefit--, std::vector<std::string>{});
     ps.Add(std::move(op_dq_onednn_pattern));
 
     return ps;

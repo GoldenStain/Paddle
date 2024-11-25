@@ -1207,10 +1207,11 @@ ir::Tensor Reverse(const ir::Tensor& input,
 ir::Tensor Transpose(const ir::Tensor& input,
                      const std::vector<int>& axis,
                      const std::string& output_name) {
-  PADDLE_ENFORCE_EQ(input->shape.size(),
-                    axis.size(),
-                    ::common::errors::InvalidArgument(
-                        "input shape size and axis size is not equal!"));
+  PADDLE_ENFORCE_GE(
+      input->shape.size(),
+      axis.size(),
+      ::common::errors::InvalidArgument("input shape size should be equal to "
+                                        "or greater than the axis's size."));
   for (int idx = 0; idx < axis.size(); ++idx) {
     PADDLE_ENFORCE_EQ(axis[idx] >= 0 && axis[idx] < axis.size(),
                       true,
@@ -1224,10 +1225,10 @@ ir::Tensor Transpose(const ir::Tensor& input,
     }
   }
   // compute output shape
-  std::vector<Expr> shape = input->shape;
-  std::vector<Expr> output_shape;
+  const std::vector<Expr>& shape = input->shape;
+  std::vector<Expr> output_shape = input->shape;
   for (auto idx = 0; idx < axis.size(); ++idx) {
-    output_shape.push_back(shape[axis[idx]]);
+    output_shape[idx] = shape[axis[idx]];
   }
 
   // transpose axis to map output to input
@@ -1239,6 +1240,12 @@ ir::Tensor Transpose(const ir::Tensor& input,
         new_axis.push_back(idy);
       }
     }
+  }
+  // If new_axis size is less than output shape, add axis to the end.
+  // For example: input shape is [2,3,4], axis is [1,0],
+  //              output_shape is [3,2,4], the new_axis is [1,0,2]
+  while (new_axis.size() < output_shape.size()) {
+    new_axis.push_back(new_axis.size());
   }
 
   return lang::Compute(

@@ -50,10 +50,14 @@ if TYPE_CHECKING:
 __all__ = []
 
 
-def bernoulli(x: Tensor, name: str | None = None) -> Tensor:
+def bernoulli(
+    x: Tensor, p: float | None = None, name: str | None = None
+) -> Tensor:
     r"""
 
-    For each element :math:`x_i` in input ``x``, take a sample from the Bernoulli distribution, also called two-point distribution, with success probability :math:`x_i`. The Bernoulli distribution with success probability :math:`x_i` is a discrete probability distribution with probability mass function
+    For each element :math:`x_i` in input ``x``, take a sample from the Bernoulli distribution, also called two-point distribution,
+    with success probability :math:`x_i`. The Bernoulli distribution with success probability :math:`x_i` is a discrete probability
+    distribution with probability mass function
 
     .. math::
         p(y)=\begin{cases}
@@ -63,6 +67,8 @@ def bernoulli(x: Tensor, name: str | None = None) -> Tensor:
 
     Args:
         x (Tensor): The input Tensor, it's data type should be float32, float64.
+        p (float|None, optional): If ``p`` is given, the success probability will always be ``p``. Default is None, which means
+            to use the success probability specified by input ``x``.
         name (str|None, optional): For details, please refer to :ref:`api_guide_Name`. Generally, no setting is required. Default: None.
 
     Returns:
@@ -92,7 +98,15 @@ def bernoulli(x: Tensor, name: str | None = None) -> Tensor:
              [0., 1., 0.]])
             >>> # doctest: -SKIP
 
+            >>> out = paddle.bernoulli(x, p=0)
+            >>> print(out)
+            Tensor(shape=[2, 3], dtype=float32, place=Place(cpu), stop_gradient=True,
+            [[0., 0., 0.],
+             [0., 0., 0.]])
     """
+
+    if p is not None:
+        x = paddle.full_like(x, p)
 
     if in_dynamic_or_pir_mode():
         return _C_ops.bernoulli(x)

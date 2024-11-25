@@ -76,7 +76,7 @@ class ShapeLayer(paddle.nn.Layer):
         x = paddle.reshape(x, [-1, x.shape[1]])
         bs = x.shape[0]  # -1
 
-        # for trigger choos_shape_attr_or_api
+        # for trigger choose_shape_attr_or_api
         out = paddle.zeros([bs, 1], dtype='float32')
         return out
 

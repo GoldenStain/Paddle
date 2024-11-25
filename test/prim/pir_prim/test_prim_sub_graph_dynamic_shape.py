@@ -701,6 +701,19 @@ class TestPrimInstancenorm(TestPrimBase):
         self.tol = 5e-6
 
 
+class TestPrimInstancenormNC(TestPrimBase):
+    def setUp(self):
+        np.random.seed(2023)
+        self.shape_x = [2, 128]
+        self.dtype_x = "float32"
+        self.init_x_shape = [None, None]
+        self.x = np.random.random(self.shape_x).astype(self.dtype_x)
+        self.net = instance_norm_net
+        self.necessary_ops = "pd_op.instance_norm"
+        self.enable_cinn = False
+        self.tol = 2e-5
+
+
 class TestPrimGroupNorm1(TestPrimBase):
     def setUp(self):
         np.random.seed(2023)

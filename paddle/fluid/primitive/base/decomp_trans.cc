@@ -491,8 +491,18 @@ void DecompProgram::decomp_block(
     if (enable_prim) {
       VLOG(4) << "[Prim] decomp op name " << op->name();
       check_decomp_dynamic_shape(op);
-      auto& builder = *(paddle::dialect::ApiBuilder::Instance().GetBuilder());
-      builder.set_insertion_point(op);
+      std::shared_ptr<pir::Builder> builder =
+          paddle::dialect::ApiBuilder::Instance().GetBuilder();
+      builder->set_insertion_point(op);
+
+      int op_role = (op->attribute<pir::Int32Attribute>("op_role"))
+                        ? op->attribute<pir::Int32Attribute>("op_role").data()
+                        : -1;
+      int chunk_id = (op->attribute<pir::Int32Attribute>("chunk_id"))
+                         ? op->attribute<pir::Int32Attribute>("chunk_id").data()
+                         : -1;
+      pir::BuilderAttrGuard guard(builder, op_role, chunk_id);
+
       std::vector<std::vector<pir::Value>> decomp_res = call_decomp_rule(op);
       if (decomp_res.size() == 0) {
         // if we don't decomp this op, then leave it intact.
@@ -563,8 +573,9 @@ void DecompProgram::decomp_block(
       tar_vars[i] = src_vars_[i];
     }
   }
-  auto& builder = *(paddle::dialect::ApiBuilder::Instance().GetBuilder());
-  builder.SetInsertionPointToBlockEnd(block);
+  std::shared_ptr<pir::Builder> builder =
+      paddle::dialect::ApiBuilder::Instance().GetBuilder();
+  builder->SetInsertionPointToBlockEnd(block);
 }
 
 }  // namespace paddle

@@ -69,6 +69,7 @@ class ParallelOptimizer:
         assert self.optimizer is not None
         if self.is_initialized:
             return self.optimizer
+
         # 1.replace optimizer parameters
         self.optimizer._parameter_list = parallelized_parameters
         if isinstance(parallelized_parameters[0], dict):
@@ -77,19 +78,20 @@ class ParallelOptimizer:
                 self.optimizer._add_param_group(param_group.copy())
         else:
             self.optimizer._param_groups = self.optimizer._parameter_list
+
         # 2.wrap with shard_optimizer
         mesh = fleet.auto.get_mesh()
         if self.level == "1":
             self.optimizer = dist.shard_optimizer(
-                self.optimizer, dist.ShardingStage1(mesh)
+                self.optimizer, dist.ShardingStage1("dp", mesh)
             )
         elif self.level == "2":
             self.optimizer = dist.shard_optimizer(
-                self.optimizer, dist.ShardingStage2(mesh)
+                self.optimizer, dist.ShardingStage2("dp", mesh)
             )
         elif self.level == "3":
             self.optimizer = dist.shard_optimizer(
-                self.optimizer, dist.ShardingStage3(mesh)
+                self.optimizer, dist.ShardingStage3("dp", mesh)
             )
         else:
             self.optimizer = dist.shard_optimizer(self.optimizer)

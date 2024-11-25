@@ -2152,7 +2152,7 @@ void PSGPUWrapper::BeginPass() {
         common::errors::Fatal("[BeginPass] current task is not ended."));
   }
 
-  debug_gpu_memory_info("befor build task");
+  debug_gpu_memory_info("before build task");
   build_task();
   debug_gpu_memory_info("after build task");
   timer.Pause();

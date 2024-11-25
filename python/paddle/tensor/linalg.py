@@ -200,6 +200,7 @@ def matrix_transpose(
 
     Args:
         x (Tensor): The input tensor to be transposed. `x` must be an N-dimensional tensor (N >= 2) of any data type supported by Paddle.
+        name (str|None, optional): The name of this layer. For more information, please refer to :ref:`api_guide_Name`. Default is None.
 
     Returns:
         Tensor: A new tensor with the same shape as `x`, except that the last two dimensions are transposed.

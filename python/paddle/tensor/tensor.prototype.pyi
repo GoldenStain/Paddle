@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # The `Tensor` template `tensor.prototype.pyi` for `tools/gen_tensor_stub.py` to generate the stub file `tensor.pyi`.
-# Add docstring, attributes, methods and alias with type annotaions for `Tensor` in `tensor.prototype.pyi`
+# Add docstring, attributes, methods and alias with type annotations for `Tensor` in `tensor.prototype.pyi`
 # if not conveniently coding in original place (like c++ source file).
 
 # Import common typings for generated methods
@@ -171,6 +171,7 @@ class AbstractTensor:
     def __mod__(self, y: _typing.TensorLike) -> Tensor: ...
     def __pow__(self, y: _typing.TensorLike) -> Tensor: ...
     def __and__(self, y: _typing.TensorLike) -> Tensor: ...
+    def __ror__(self, y: _typing.TensorLike) -> Tensor: ...
     def __div__(self, y: _typing.TensorLike) -> Tensor: ...
     def __radd__(self, y: _typing.TensorLike) -> Tensor: ...  # type: ignore
     def __rsub__(self, y: _typing.TensorLike) -> Tensor: ...  # type: ignore
@@ -181,6 +182,7 @@ class AbstractTensor:
     def __rpow__(self, y: _typing.TensorLike) -> Tensor: ...  # type: ignore
     def __rdiv__(self, y: _typing.TensorLike) -> Tensor: ...  # type: ignore
     def __rfloordiv__(self, y: _typing.TensorLike) -> Tensor: ...  # type: ignore
+    def __rand__(self, y: _typing.TensorLike) -> Tensor: ...  # type: ignore
 
     # type cast
     def __bool__(self) -> bool: ...

@@ -36,6 +36,7 @@
 #include "paddle/fluid/pir/dialect/operator/ir/pd_op.h"
 #include "paddle/fluid/pir/dialect/operator/utils/op_yaml_info_parser.h"
 #include "paddle/fluid/pir/dialect/operator/utils/utils.h"
+#include "paddle/phi/common/memory_utils.h"
 #include "paddle/phi/core/enforce.h"
 #include "paddle/phi/core/kernel_context.h"
 #include "paddle/phi/core/meta_tensor.h"
@@ -314,6 +315,10 @@ void DeepCopyVariable(const Variable* src_var,
     // have holder. In this case we only do set_meta but not copy Tensor.
     if (src_tensor.numel() == 0) {
       tmp_dst_tensor->set_meta(src_tensor.meta());
+      if (src_tensor.IsInitialized()) {
+        tmp_dst_tensor->ResetHolder(
+            ::phi::memory_utils::AllocShared(src_tensor.place(), 0u));
+      }
       return;
     }
     if (!src_tensor.initialized()) {

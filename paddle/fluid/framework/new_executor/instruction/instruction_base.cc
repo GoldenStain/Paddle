@@ -217,20 +217,20 @@ const phi::DeviceContext& InstructionBase::DeviceContext() const {
 }
 
 void InstructionBase::RecordEvent(const Place& place) const {
-  phi::RecordEvent record(
-      "RecordStreamEvent", phi::TracerEventType::UserDefined, 10);
   if (event_to_record_) {
+    phi::RecordEvent record(
+        "RecordStreamEvent", phi::TracerEventType::UserDefined, 10);
     VLOG(6) << "Record event at instruction: " << id_;
     event_to_record_->event_->Record(dev_ctx_);
   }
 }
 
 void InstructionBase::WaitEvent(const Place& place) const {
-  // If InterpreterCore in on CPUPlace, do nothing.
-  if (phi::is_cpu_place(place)) {
-    return;
-  }
   for (const EventInter& event_iter : events_to_wait_) {
+    // If InterpreterCore in on CPUPlace, do nothing.
+    if (phi::is_cpu_place(place)) {
+      continue;
+    }
     phi::RecordEvent record(
         "WaitStreamEvent", phi::TracerEventType::UserDefined, 10);
     VLOG(6) << "Wait instruction: " << event_iter.instr_id_

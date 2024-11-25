@@ -87,6 +87,7 @@ class AddNArrayOp : public pir::Op<AddNArrayOp,
 class FusedGemmEpilogueOp : public pir::Op<FusedGemmEpilogueOp,
                                            paddle::dialect::OpYamlInfoInterface,
                                            paddle::dialect::InferMetaInterface,
+                                           paddle::dialect::VjpInterface,
                                            InferSymbolicShapeInterface> {
  public:
   using Op::Op;
@@ -108,6 +109,12 @@ class FusedGemmEpilogueOp : public pir::Op<FusedGemmEpilogueOp,
   pir::Value out() { return result(0); }
   pir::Value reserve_space() { return result(1); }
 
+  static std::vector<std::vector<pir::Value>> Vjp(
+      pir::Operation *op,
+      const std::vector<std::vector<pir::Value>> &inputs_,
+      const std::vector<std::vector<pir::Value>> &outputs,
+      const std::vector<std::vector<pir::Value>> &out_grads,
+      const std::vector<std::vector<bool>> &stop_gradients);
   static void InferMeta(phi::InferMetaContext *infer_meta);
   static std::vector<pir::Type> InferMeta(
       const std::vector<pir::Value> &input_values,

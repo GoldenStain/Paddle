@@ -28,6 +28,10 @@ __global__ void int8_gemm(int8_t const* act,
                           int m,
                           int n,
                           int k) {
+#if defined(PADDLE_WITH_CUDA) && defined(__CUDA_ARCH__) && __CUDA_ARCH__ < 700
+  return;
+#endif
+
   using VecType = int4;
   static constexpr int kStepK = 128 / (8 * sizeof(int8_t));
   static constexpr int CtaK = kStepK * Threads;

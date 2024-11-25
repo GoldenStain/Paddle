@@ -37,13 +37,12 @@ def instance_norm_wrapper(
 def _reference_instance_norm(x, scale, bias, epsilon):
     prev_x_shape = x.shape
     if len(x.shape) < 4:
-        N, C = x.shape[0], x.shape[1]
-        x = np.reshape(x, (N, C, -1, 1))
+        x = np.reshape(x, (x.shape[0], x.shape[1], -1, 1))
 
     N, C, H, W = x.shape
     mean = np.mean(x, axis=(2, 3), keepdims=True)
     variance = np.var(x, axis=(2, 3), keepdims=True)
-    std = np.sqrt(variance) + epsilon
+    std = np.sqrt(variance + epsilon)
     x_norm = (x - mean) / std
     scale = scale.reshape([1, C, 1, 1])
     bias = bias.reshape([1, C, 1, 1])
@@ -298,6 +297,34 @@ class TestInstanceNormFP32OP(OpTest):
 class TestInstanceNormWithNCL(TestInstanceNormFP32OP):
     def init_shape(self):
         self.shape = [4, 100, 16]
+
+    def test_check_output(self):
+        self.check_output(
+            atol=self.atol,
+            check_pir=True,
+            check_prim_pir=(
+                False if os.getenv("FLAGS_enable_pir_in_executor") else True
+            ),
+        )
+
+    def test_check_grad(self):
+        self.check_grad(
+            ['X', 'Scale', 'Bias'],
+            'Y',
+            check_pir=True,
+            check_prim_pir=(
+                False if os.getenv("FLAGS_enable_pir_in_executor") else True
+            ),
+        )
+
+
+class TestInstanceNormWithNC(TestInstanceNormFP32OP):
+    def init_shape(self):
+        self.shape = [4, 100]
+
+    def set_err_thre(self):
+        super().set_err_thre()
+        self.fw_comp_atol = 3e-5
 
     def test_check_output(self):
         self.check_output(

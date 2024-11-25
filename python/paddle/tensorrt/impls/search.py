@@ -157,11 +157,15 @@ def topk_converter(network, paddle_op, inputs):
 
     input_shape = paddle_op.operands()[0].source().shape
 
-    k = paddle_op.attrs().get("k", 1)
     axis = paddle_op.attrs().get("axis", -1)
     largest = paddle_op.attrs().get("largest", True)
     flag = trt.TopKOperation.MAX if largest else trt.TopKOperation.MIN
 
+    k_op = paddle_op.operands()[1].source().get_defining_op()
+    if k_op.name() == "pd_op.full":
+        k = k_op.attrs()["value"]
+    else:
+        raise NotImplementedError("Dynamic k is not supported in TensorRT.")
     input_rank = len(input_shape)
 
     expand_to_2d = input_rank == 1
@@ -174,7 +178,8 @@ def topk_converter(network, paddle_op, inputs):
 
     if axis < 0:
         axis += input_rank
-    layer = network.add_topk(input_tensor, flag, k, 1 << axis)
+
+    layer = network.add_topk(input_tensor, flag, int(k), 1 << axis)
     values = layer.get_output(0)
     indices = layer.get_output(1)
 

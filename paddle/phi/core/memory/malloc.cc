@@ -61,7 +61,7 @@ uint64_t Release(const phi::GPUPlace& place, gpuStream_t stream) {
   return allocation::AllocatorFacade::Instance().Release(place, stream);
 }
 
-void RecordStream(std::shared_ptr<Allocation> allocation, gpuStream_t stream) {
+bool RecordStream(std::shared_ptr<Allocation> allocation, gpuStream_t stream) {
   return allocation::AllocatorFacade::Instance().RecordStream(allocation,
                                                               stream);
 }
@@ -78,7 +78,7 @@ gpuStream_t GetStream(const std::shared_ptr<Allocation>& allocation) {
 #endif
 
 #ifdef PADDLE_WITH_CUSTOM_DEVICE
-void RecordStream(std::shared_ptr<Allocation> allocation,
+bool RecordStream(std::shared_ptr<Allocation> allocation,
                   phi::stream::stream_t stream) {
   return allocation::AllocatorFacade::Instance().RecordStream(allocation,
                                                               stream);

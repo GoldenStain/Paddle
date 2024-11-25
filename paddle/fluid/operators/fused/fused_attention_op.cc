@@ -389,8 +389,8 @@ class FusedAttentionOpMaker : public framework::OpProtoAndCheckerMaker {
                   "The qkv_w shape is (h, 3h), do transpose to it.")
         .SetDefault(false);
     AddAttr<bool>("pre_layer_norm",
-                  "if true, the attention op uses pre_layer_norm architecure, "
-                  "else, uses post_layer_norm architecuture. "
+                  "if true, the attention op uses pre_layer_norm architecture, "
+                  "else, uses post_layer_norm architecture. "
                   "[default false].")
         .SetDefault(false);
     AddAttr<float>("epsilon",

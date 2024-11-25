@@ -189,7 +189,7 @@ SpmdInfo CrossEntropyWithSoftmaxInferSpmdBase(const DistMetaTensor& x,
   // todo if softmax_normalize axis is sharded, notify downstream phi api to
   // select c_softmax_with_entropy_kernel.
 
-  // according to the phi api implementation, the softmax_out tensor will alway
+  // according to the phi api implementation, the softmax_out tensor will always
   // be generated not matter the value of use_softmax.
   return {{x_dist_attr_dst, label_dist_attr_dst},
           {softmax_out_dist_attr_dst, loss_dist_attr_dst}};
@@ -363,7 +363,7 @@ SpmdInfo CrossEntropyWithSoftmaxInferSpmdReverse(
           << str_join(x_dims_mapping) << "]\nLabel dims_mapping: ["
           << str_join(label_dims_mapping) << "]\n\n";
 
-  // according to the phi api implementation, the softmax_out tensor will alway
+  // according to the phi api implementation, the softmax_out tensor will always
   // be generated not matter the value of use_softmax.
   return {{x_dist_attr, label_dist_attr},
           {s_out_dist_attr_dst, loss_dist_attr_dst}};

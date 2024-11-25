@@ -36,6 +36,9 @@ COMMON_DECLARE_bool(dynamic_static_unified_comm);
 #include "paddle/phi/core/distributed/bkcl_comm_context.h"
 COMMON_DECLARE_bool(dynamic_static_unified_comm);
 #endif
+#if defined(PADDLE_WITH_CUSTOM_DEVICE)
+COMMON_DECLARE_bool(dynamic_static_unified_comm);
+#endif
 
 #include "paddle/phi/core/distributed/auto_parallel/reshard/reshard_utils.h"
 #include "paddle/phi/core/distributed/comm_context_manager.h"
@@ -72,17 +75,29 @@ class CCommInitOp : public framework::OperatorBase {
         device_id = Attr<int>("device_id");
       }
       int rank_id = Attr<int>("rank");
-      auto store = phi::distributed::CreateOrGetGlobalTCPStore();
-      if (!phi::distributed::CommContextManager::GetInstance().Has(
-              std::to_string(rid))) {
-        phi::distributed::CommContextManager::CreateXCCLCommContext(
-            store,
-            std::to_string(rid),
-            phi::CustomPlace(place.GetDeviceType(), device_id),
-            rank_id,
-            nranks,
-            "c_comm_init_op");
+      if (FLAGS_dynamic_static_unified_comm) {
+        VLOG(3) << "#### use new comm lab ####";
+        auto store = phi::distributed::CreateOrGetGlobalTCPStore();
+        if (!phi::distributed::CommContextManager::GetInstance().Has(
+                std::to_string(rid))) {
+          phi::distributed::CommContextManager::CreateXCCLCommContext(
+              store,
+              std::to_string(rid),
+              phi::CustomPlace(place.GetDeviceType(), device_id),
+              rank_id,
+              nranks,
+              "c_comm_init_op");
+        }
+        return;
       }
+
+      using UniqueId = phi::ccl::CCLRootId;
+      using CommContext = platform::XCCLCommContext;
+
+      VLOG(3) << "#### use old comm lab ####";
+      UniqueId* comm_id = var->GetMutable<UniqueId>();
+      CommContext::Instance(place.GetDeviceType())
+          .CreateComm(comm_id, nranks, rank_id, device_id, rid);
 #else
       PADDLE_THROW(common::errors::PreconditionNotMet(
           "PaddlePaddle should compile with custom device."));

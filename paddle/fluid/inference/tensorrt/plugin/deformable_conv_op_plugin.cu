@@ -220,7 +220,7 @@ nvinfer1::Dims DeformableConvPlugin::getOutputDimensions(
 bool DeformableConvPlugin::supportsFormat(
     nvinfer1::DataType type, nvinfer1::TensorFormat format) const TRT_NOEXCEPT {
   if (with_fp16_) {
-#ifdef TRT_PLUGIN_FP16_AVALIABLE
+#ifdef TRT_PLUGIN_FP16_AVAILABLE
     return (type == nvinfer1::DataType::kHALF) &&
            (format == nvinfer1::TensorFormat::kLINEAR);
 #else
@@ -257,7 +257,7 @@ int DeformableConvPlugin::enqueue(int batch_size,
   if (data_type_ == nvinfer1::DataType::kFLOAT) {
     enqueue_impl<float>(batch_size, inputs, outputs, workspace, stream);
   } else if (data_type_ == nvinfer1::DataType::kHALF) {
-#if TRT_PLUGIN_FP16_AVALIABLE
+#if TRT_PLUGIN_FP16_AVAILABLE
     enqueue_impl<half>(batch_size, inputs, outputs, workspace, stream);
 #else
     PADDLE_THROW(common::errors::InvalidArgument(
@@ -642,7 +642,7 @@ void gemm_impl<half>(cublasHandle_t handle,
                      const half* beta,
                      half* C,
                      int ldc) {
-#if TRT_PLUGIN_FP16_AVALIABLE
+#if TRT_PLUGIN_FP16_AVAILABLE
   phi::dynload::cublasHgemm(
       handle, transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
 #else
@@ -1237,7 +1237,7 @@ int DeformableConvPluginDynamic::enqueue(
     enqueue_impl<float>(
         input_desc, output_desc, inputs, outputs, workspace, stream);
   } else if (data_type_ == nvinfer1::DataType::kHALF) {
-#if TRT_PLUGIN_FP16_AVALIABLE
+#if TRT_PLUGIN_FP16_AVAILABLE
     enqueue_impl<half>(
         input_desc, output_desc, inputs, outputs, workspace, stream);
 #else

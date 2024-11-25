@@ -376,12 +376,12 @@ MakeGetterDimExpr4SymbolName(
     const std::function<const symbol::ShapeOrDataDimExprs&(int in_tensor_idx)>&
         DimExpr4InputDim) {
   std::unordered_map<std::string, std::vector<SymbolBinding>>
-      symbol_name2symbol_bindins{};
+      symbol_name2symbol_bindings{};
   for (const auto& symbol_binding : symbol_bindings) {
-    symbol_name2symbol_bindins[GetSymbolNameBySymbolBinding(symbol_binding)]
+    symbol_name2symbol_bindings[GetSymbolNameBySymbolBinding(symbol_binding)]
         .emplace_back(symbol_binding);
   }
-  return [map = std::move(symbol_name2symbol_bindins), DimExpr4InputDim](
+  return [map = std::move(symbol_name2symbol_bindings), DimExpr4InputDim](
              const std::string& symbol_name) -> std::optional<DimExpr> {
     const auto& iter = map.find(symbol_name);
     if (iter == map.end()) return std::nullopt;

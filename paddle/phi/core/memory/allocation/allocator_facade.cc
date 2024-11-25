@@ -522,19 +522,20 @@ class AllocatorFacadePrivate {
     }
   }
 
-  void RecordStream(std::shared_ptr<phi::Allocation> allocation,
+  bool RecordStream(std::shared_ptr<phi::Allocation> allocation,
                     gpuStream_t stream) {
     if (auto stream_safe_cuda_allocation =
             std::dynamic_pointer_cast<StreamSafeCUDAAllocation>(allocation)) {
-      stream_safe_cuda_allocation->RecordStream(stream);
+      return stream_safe_cuda_allocation->RecordStream(stream);
 #ifdef PADDLE_WITH_CUDA
     } else if (auto cuda_malloc_async_allocation =
                    std::dynamic_pointer_cast<CUDAMallocAsyncAllocation>(
                        allocation)) {
-      cuda_malloc_async_allocation->RecordStream(stream);
+      return cuda_malloc_async_allocation->RecordStream(stream);
 #endif
     } else {
       VLOG(6) << "RecordStream for a non-StreamSafeCUDAAllocation";
+      return false;
     }
   }
 
@@ -659,14 +660,15 @@ class AllocatorFacadePrivate {
             << place;
   }
 
-  void RecordStream(std::shared_ptr<phi::Allocation> allocation,
+  bool RecordStream(std::shared_ptr<phi::Allocation> allocation,
                     XPUStream stream) {
     std::shared_ptr<StreamSafeXPUAllocation> stream_safe_xpu_allocation =
         std::dynamic_pointer_cast<StreamSafeXPUAllocation>(allocation);
     if (stream_safe_xpu_allocation != nullptr) {
-      stream_safe_xpu_allocation->RecordStream(stream);
+      return stream_safe_xpu_allocation->RecordStream(stream);
     } else {
       VLOG(6) << "RecordStream for a non-StreamSafeXPUAllocation";
+      return false;
     }
   }
 
@@ -771,16 +773,17 @@ class AllocatorFacadePrivate {
             << ") in " << place;
   }
 
-  void RecordStream(std::shared_ptr<phi::Allocation> allocation,
+  bool RecordStream(std::shared_ptr<phi::Allocation> allocation,
                     phi::stream::stream_t stream) {
     std::shared_ptr<StreamSafeCustomDeviceAllocation>
         stream_safe_custom_device_allocation =
             std::dynamic_pointer_cast<StreamSafeCustomDeviceAllocation>(
                 allocation);
     if (stream_safe_custom_device_allocation != nullptr) {
-      stream_safe_custom_device_allocation->RecordStream(stream);
+      return stream_safe_custom_device_allocation->RecordStream(stream);
     } else {
       VLOG(6) << "RecordStream for a non-StreamSafeCustomDeviceAllocation";
+      return false;
     }
   }
 
@@ -1789,9 +1792,9 @@ uint64_t AllocatorFacade::Release(const phi::GPUPlace& place,
   return m->GetAllocator(place, stream)->Release(place);
 }
 
-void AllocatorFacade::RecordStream(std::shared_ptr<phi::Allocation> allocation,
+bool AllocatorFacade::RecordStream(std::shared_ptr<phi::Allocation> allocation,
                                    gpuStream_t stream) {
-  GetPrivate()->RecordStream(allocation, stream);
+  return GetPrivate()->RecordStream(allocation, stream);
 }
 
 void AllocatorFacade::EraseStream(std::shared_ptr<phi::Allocation> allocation,
@@ -1913,9 +1916,9 @@ uint64_t AllocatorFacade::Release(const phi::CustomPlace& place,
   return m->GetAllocator(place, stream)->Release(place);
 }
 
-void AllocatorFacade::RecordStream(std::shared_ptr<phi::Allocation> allocation,
+bool AllocatorFacade::RecordStream(std::shared_ptr<phi::Allocation> allocation,
                                    phi::stream::stream_t stream) {
-  GetPrivate()->RecordStream(allocation, stream);
+  return GetPrivate()->RecordStream(allocation, stream);
 }
 
 const std::shared_ptr<Allocator>& AllocatorFacade::GetAllocator(

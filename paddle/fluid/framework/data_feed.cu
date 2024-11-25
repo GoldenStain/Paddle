@@ -33,6 +33,7 @@ limitations under the License. */
 #include "paddle/fluid/framework/fleet/ps_gpu_wrapper.h"
 #include "paddle/fluid/framework/io/fs.h"
 #include "paddle/phi/core/platform/collective_helper.h"
+#include "paddle/phi/kernels/funcs/shuffle_batch.cu.h"
 #include "paddle/phi/kernels/gpu/graph_reindex_funcs.h"
 #include "paddle/phi/kernels/graph_reindex_kernel.h"
 
@@ -3505,11 +3506,16 @@ int FillWalkBuf(const std::vector<uint64_t> &h_device_keys_len,
   thrust::random::default_random_engine engine(*shuffle_seed_ptr);
   const auto &exec_policy = thrust::cuda::par(allocator).on(stream);
   thrust::counting_iterator<int> cnt_iter(0);
+#if defined(PADDLE_WITH_CUDA)
+  phi::funcs::shuffle_copy_fixed(
+      thrust::detail::derived_cast(thrust::detail::strip_const(exec_policy)),
+#else
   thrust::shuffle_copy(exec_policy,
-                       cnt_iter,
-                       cnt_iter + *total_row_ptr,
-                       thrust::device_pointer_cast(d_random_row),
-                       engine);
+#endif
+      cnt_iter,
+      cnt_iter + *total_row_ptr,
+      thrust::device_pointer_cast(d_random_row),
+      engine);
 
   thrust::transform(exec_policy,
                     cnt_iter,
@@ -3798,11 +3804,16 @@ int FillWalkBufMultiPath(
   thrust::random::default_random_engine engine(*shuffle_seed_ptr);
   const auto &exec_policy = thrust::cuda::par(allocator).on(stream);
   thrust::counting_iterator<int> cnt_iter(0);
+#if defined(PADDLE_WITH_CUDA)
+  phi::funcs::shuffle_copy_fixed(
+      thrust::detail::derived_cast(thrust::detail::strip_const(exec_policy)),
+#else
   thrust::shuffle_copy(exec_policy,
-                       cnt_iter,
-                       cnt_iter + *total_row_ptr,
-                       thrust::device_pointer_cast(d_random_row),
-                       engine);
+#endif
+      cnt_iter,
+      cnt_iter + *total_row_ptr,
+      thrust::device_pointer_cast(d_random_row),
+      engine);
 
   thrust::transform(exec_policy,
                     cnt_iter,
@@ -4182,7 +4193,7 @@ void GraphDataGenerator::DoSageForInfer() {
         total_instance = 2;
         d_type_keys = reinterpret_cast<uint64_t *>(
             d_device_keys_[tensor_pair_idx][infer_cursor_[tensor_pair_idx]]
-                ->ptr());  // copy from begining
+                ->ptr());  // copy from beginning
       } else {
         d_type_keys += infer_node_start_[tensor_pair_idx];
         infer_node_start_[tensor_pair_idx] += total_instance / 2;
